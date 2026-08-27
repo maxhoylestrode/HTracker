@@ -1,6 +1,6 @@
-# Deploying Htracker on Ubuntu + nginx
+# Deploying Htracker on Ubuntu, behind Nginx Proxy Manager
 
-Domain used below: `tracker.apexstudio.dev` — replace it if that changes. Run everything as a user with `sudo` access.
+This setup assumes Nginx Proxy Manager (NPM) is running in Docker on a **different** server, and this Ubuntu box just runs the Node app and exposes it on the network for NPM to reach. Domain used below: `tracker.apexstudio.dev` — replace it if that changes. Run everything as a user with `sudo` access.
 
 ## 1. Install Node.js 22
 
@@ -61,67 +61,34 @@ sudo systemctl enable --now htracker
 sudo systemctl status htracker   # should show "active (running)"
 ```
 
-The app is now listening on `127.0.0.1:3000` only — not exposed to the internet yet.
+By default Node's `.listen(PORT)` binds to all interfaces (`0.0.0.0`), so the app is already reachable from the network on port 3000 — nothing to change there. It is **not** exposed through any local nginx/certbot on this box; NPM on the other server handles that.
 
-## 5. nginx reverse proxy
+## 5. Lock the firewall down to just the NPM server
 
-```bash
-sudo apt-get install -y nginx
-```
-
-Create `/etc/nginx/sites-available/htracker`:
-
-```nginx
-server {
-    listen 80;
-    listen [::]:80;
-    server_name tracker.apexstudio.dev;
-
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-    }
-
-    client_max_body_size 1m;
-}
-```
-
-Enable it:
-
-```bash
-sudo ln -s /etc/nginx/sites-available/htracker /etc/nginx/sites-enabled/htracker
-sudo nginx -t
-sudo systemctl reload nginx
-```
-
-At this point `http://tracker.apexstudio.dev` should load the app (make sure the domain's DNS A/AAAA record already points at this server).
-
-## 6. HTTPS via Let's Encrypt
-
-```bash
-sudo apt-get install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d tracker.apexstudio.dev
-```
-
-Certbot rewrites the nginx config to add the 443 block and an automatic HTTP→HTTPS redirect, and sets up auto-renewal. Confirm renewal works:
-
-```bash
-sudo certbot renew --dry-run
-```
-
-## 7. Firewall (if ufw is in use)
+Don't leave port 3000 open to the whole internet — only the NPM server should be able to reach it. Find the NPM server's IP, then:
 
 ```bash
 sudo ufw allow OpenSSH
-sudo ufw allow 'Nginx Full'
+sudo ufw allow from <NPM_SERVER_IP> to any port 3000
 sudo ufw enable
+sudo ufw status
 ```
+
+Replace `<NPM_SERVER_IP>` with that server's actual IP (its LAN IP if both boxes share a private network, otherwise its public IP).
+
+## 6. Add the Proxy Host in Nginx Proxy Manager
+
+In the NPM web UI → **Proxy Hosts** → **Add Proxy Host**:
+
+- **Domain Names**: `tracker.apexstudio.dev`
+- **Scheme**: `http`
+- **Forward Hostname / IP**: this Ubuntu server's IP (its LAN IP if NPM and this box share a private network — a Docker container's `127.0.0.1` means itself, not the host, so don't use that; otherwise use this server's public IP)
+- **Forward Port**: `3000`
+- **Websockets Support**: off (not needed, doesn't hurt if left on)
+
+On the **SSL** tab: request a new Let's Encrypt certificate, enable **Force SSL** and **HTTP/2 Support**. Make sure the domain's DNS A/AAAA record already points at wherever NPM's server is reachable (its public IP), not at this Htracker box.
+
+Save, then `tracker.apexstudio.dev` should load the app over HTTPS.
 
 ## Updating the app later
 
@@ -135,5 +102,5 @@ sudo systemctl restart htracker
 ## Notes
 
 - SQLite data lives at `/opt/htracker/data/htracker.db`. Back that file up regularly (`sqlite3 data/htracker.db ".backup backup.db"` or just copy the file while the service is briefly stopped).
-- `TRUST_PROXY=true` in `.env` is required once you're behind nginx — it's what lets Express correctly mark session cookies as `secure` and see the real client IP.
+- `TRUST_PROXY=true` in `.env` is required once you're behind NPM — it's what lets Express correctly mark session cookies as `secure` and see the real client IP.
 - To reset the login password later, just re-run `npm run create-admin` on the server.
