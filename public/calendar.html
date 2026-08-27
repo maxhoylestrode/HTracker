@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Htracker — Calendar</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="app-header">
+  <div class="brand">🏠 Htracker</div>
+  <nav class="app-nav">
+    <a href="/index.html">Dashboard</a>
+    <a href="/calendar.html">Calendar</a>
+    <a href="/expenses.html">Expenses</a>
+    <div class="user-pill">
+      <span id="userPill"></span>
+      <button id="logoutBtn" class="btn-secondary">Log out</button>
+    </div>
+  </nav>
+</header>
+
+<main class="app-main">
+  <div class="panel">
+    <div class="cal-header">
+      <h2 id="monthLabel">—</h2>
+      <div class="cal-nav">
+        <button class="btn-secondary" id="prevMonth">&larr; Prev</button>
+        <button class="btn-secondary" id="todayBtn">Today</button>
+        <button class="btn-secondary" id="nextMonth">Next &rarr;</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+</main>
+
+<div class="modal-overlay hidden" id="eventModal">
+  <div class="modal">
+    <h2 id="eventModalTitle">Payment</h2>
+    <div id="eventModalBody"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="closeEventModal">Close</button>
+      <a class="btn-primary" style="text-decoration:none; padding:0.6rem 1rem; display:inline-block" id="viewExpenseLink">View expense</a>
+    </div>
+  </div>
+</div>
+
+<script src="/js/common.js"></script>
+<script src="/js/calendar.js"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Htracker — Dashboard</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="app-header">
+  <div class="brand">🏠 Htracker</div>
+  <nav class="app-nav">
+    <a href="/index.html">Dashboard</a>
+    <a href="/calendar.html">Calendar</a>
+    <a href="/expenses.html">Expenses</a>
+    <div class="user-pill">
+      <span id="userPill"></span>
+      <button id="logoutBtn" class="btn-secondary">Log out</button>
+    </div>
+  </nav>
+</header>
+
+<main class="app-main">
+  <div class="cards">
+    <div class="card">
+      <div class="label">Total Monthly Spend</div>
+      <div class="value" id="totalMonthly">—</div>
+    </div>
+    <div class="card">
+      <div class="label">Active Expenses</div>
+      <div class="value" id="activeCount">—</div>
+    </div>
+    <div class="card">
+      <div class="label">Due in Next 30 Days</div>
+      <div class="value" id="due30Count">—</div>
+    </div>
+    <div class="card">
+      <div class="label">Upcoming Cost Increases</div>
+      <div class="value" id="increaseCount">—</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Spend by Category</h2>
+    <div id="byCategory"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Spend by Payment Type</h2>
+    <div id="byPaymentType"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Upcoming Payments (next 30 days)</h2>
+    <div id="upcomingList"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Upcoming Cost Increases</h2>
+    <div id="increaseList"></div>
+  </div>
+</main>
+
+<script src="/js/common.js"></script>
+<script src="/js/dashboard.js"></script>
+</body>
+</html>

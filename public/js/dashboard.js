@@ -1,0 +1,78 @@
+async function loadDashboard() {
+  const summary = await api('/api/summary');
+
+  document.getElementById('totalMonthly').textContent = fmtMoney(summary.total_monthly);
+  document.getElementById('activeCount').textContent = summary.active_expense_count;
+  document.getElementById('due30Count').textContent = summary.upcoming_30_days.length;
+  document.getElementById('increaseCount').textContent = summary.upcoming_cost_increases.length;
+
+  renderBars('byCategory', summary.by_category);
+  renderBars('byPaymentType', summary.by_payment_type, PAYMENT_TYPE_LABELS);
+
+  const listEl = document.getElementById('upcomingList');
+  listEl.innerHTML = '';
+  if (!summary.upcoming_30_days.length) {
+    listEl.innerHTML = '<p style="color:var(--text-dim)">Nothing due in the next 30 days.</p>';
+  }
+  summary.upcoming_30_days.forEach((item) => {
+    const row = document.createElement('div');
+    row.className = 'list-item';
+    row.innerHTML = `
+      <span class="dot" style="background:${item.color}"></span>
+      <span class="name">${escapeHtml(item.name)}</span>
+      <span class="badge">${PAYMENT_TYPE_LABELS[item.payment_type] || item.payment_type}</span>
+      <span class="date">${fmtDate(item.date)}</span>
+      <span class="amt">${fmtMoney(item.amount)}</span>
+    `;
+    listEl.appendChild(row);
+  });
+
+  const incEl = document.getElementById('increaseList');
+  incEl.innerHTML = '';
+  if (!summary.upcoming_cost_increases.length) {
+    incEl.innerHTML = '<p style="color:var(--text-dim)">No scheduled cost increases.</p>';
+  }
+  summary.upcoming_cost_increases.forEach((item) => {
+    const row = document.createElement('div');
+    row.className = 'list-item';
+    row.innerHTML = `
+      <span class="name">${escapeHtml(item.name)}</span>
+      <span class="date">${fmtDate(item.effective_date)}</span>
+      <span class="amt">${fmtMoney(item.amount)}</span>
+    `;
+    incEl.appendChild(row);
+  });
+}
+
+function renderBars(containerId, data, labelMap) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  const entries = Object.entries(data).sort((a, b) => b[1] - a[1]);
+  const max = Math.max(1, ...entries.map(([, v]) => v));
+  if (!entries.length) {
+    el.innerHTML = '<p style="color:var(--text-dim)">No data yet.</p>';
+    return;
+  }
+  entries.forEach(([key, val]) => {
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    const label = labelMap ? (labelMap[key] || key) : key;
+    row.innerHTML = `
+      <span class="bar-label">${escapeHtml(label)}</span>
+      <span class="bar-track"><span class="bar-fill" style="width:${(val / max) * 100}%; background:var(--accent)"></span></span>
+      <span class="bar-amount">${fmtMoney(val)}</span>
+    `;
+    el.appendChild(row);
+  });
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const session = await guardSession();
+  if (session) loadDashboard().catch(console.error);
+});
