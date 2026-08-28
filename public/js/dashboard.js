@@ -2,12 +2,13 @@ async function loadDashboard() {
   const summary = await api('/api/summary');
 
   document.getElementById('totalMonthly').textContent = fmtMoney(summary.total_monthly);
+  document.getElementById('yourShare').textContent = fmtMoney(summary.total_monthly / 2);
   document.getElementById('activeCount').textContent = summary.active_expense_count;
   document.getElementById('due30Count').textContent = summary.upcoming_30_days.length;
   document.getElementById('increaseCount').textContent = summary.upcoming_cost_increases.length;
 
-  renderBars('byCategory', summary.by_category);
-  renderBars('byPaymentType', summary.by_payment_type, PAYMENT_TYPE_LABELS);
+  renderBars('byCategory', summary.by_category, null, summary.category_colors);
+  renderBars('byPaymentType', summary.by_payment_type, PAYMENT_TYPE_LABELS, summary.payment_type_colors);
 
   const listEl = document.getElementById('upcomingList');
   listEl.innerHTML = '';
@@ -44,7 +45,7 @@ async function loadDashboard() {
   });
 }
 
-function renderBars(containerId, data, labelMap) {
+function renderBars(containerId, data, labelMap, colorMap) {
   const el = document.getElementById(containerId);
   el.innerHTML = '';
   const entries = Object.entries(data).sort((a, b) => b[1] - a[1]);
@@ -57,9 +58,11 @@ function renderBars(containerId, data, labelMap) {
     const row = document.createElement('div');
     row.className = 'bar-row';
     const label = labelMap ? (labelMap[key] || key) : key;
+    const color = (colorMap && colorMap[key]) || 'var(--accent)';
     row.innerHTML = `
+      <span class="dot" style="background:${color}"></span>
       <span class="bar-label">${escapeHtml(label)}</span>
-      <span class="bar-track"><span class="bar-fill" style="width:${(val / max) * 100}%; background:var(--accent)"></span></span>
+      <span class="bar-track"><span class="bar-fill" style="width:${(val / max) * 100}%; background:${color}"></span></span>
       <span class="bar-amount">${fmtMoney(val)}</span>
     `;
     el.appendChild(row);

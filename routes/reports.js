@@ -2,7 +2,7 @@ const express = require('express');
 const db = require('../db');
 const { currentCost, nextIncrease } = require('../lib/cost');
 const { occurrencesInRange, nextOccurrence, addMonths, toISO, parseISO } = require('../lib/dates');
-const { colorFor } = require('../lib/categories');
+const { colorFor, CATEGORY_COLORS, PAYMENT_TYPE_COLORS } = require('../lib/categories');
 
 const router = express.Router();
 
@@ -62,6 +62,8 @@ router.get('/summary', (req, res) => {
     active_expense_count: rows.length,
     by_category: byCategory,
     by_payment_type: byPaymentType,
+    category_colors: CATEGORY_COLORS,
+    payment_type_colors: PAYMENT_TYPE_COLORS,
     upcoming_30_days: upcoming30.slice(0, 50),
     upcoming_cost_increases: upcomingIncreases.slice(0, 20)
   });
