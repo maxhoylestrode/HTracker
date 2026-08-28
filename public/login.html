@@ -11,7 +11,7 @@
   <div class="login-card">
     <h1>Htracker</h1>
     <p class="sub">Sign in to manage your household expenses</p>
-    <form id="loginForm">
+    <form id="loginForm" method="POST" action="/api/auth/login">
       <div class="field">
         <label for="username">Username</label>
         <input id="username" name="username" autocomplete="username" required autofocus>
@@ -25,29 +25,6 @@
     </form>
   </div>
 </div>
-<script>
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const username = document.getElementById('username').value;
-  const password = document.getElementById('password').value;
-  const errEl = document.getElementById('errorMsg');
-  errEl.textContent = '';
-  try {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      errEl.textContent = data.error || 'Login failed';
-      return;
-    }
-    window.location.href = '/index.html';
-  } catch (err) {
-    errEl.textContent = 'Could not reach server';
-  }
-});
-</script>
+<script src="/js/login.js"></script>
 </body>
 </html>
