@@ -32,18 +32,18 @@ async function loadBreakdown() {
     const leftoverClass = u.leftover_spending_money < 0 ? 'negative' : '';
     return `
       <tr class="${u.is_you ? 'you-row' : ''}">
-        <td>${escapeHtml(u.username)}${u.is_you ? '<span class="you-badge">YOU</span>' : ''}</td>
-        <td>${fmtMoney(u.monthly_income)}</td>
-        <td>${u.normalized_share_percentage}%</td>
-        <td>${fmtMoney(u.share_of_bills)}</td>
-        <td>${fmtMoney(u.savings_goal)}</td>
-        <td class="${leftoverClass}">${fmtMoney(u.leftover_spending_money)}</td>
+        <td class="card-title">${escapeHtml(u.username)}${u.is_you ? '<span class="you-badge">YOU</span>' : ''}</td>
+        <td data-label="Monthly income">${fmtMoney(u.monthly_income)}</td>
+        <td data-label="Bill share">${u.normalized_share_percentage}%</td>
+        <td data-label="Owed towards bills">${fmtMoney(u.share_of_bills)}</td>
+        <td data-label="Savings goal">${fmtMoney(u.savings_goal)}</td>
+        <td data-label="Left to spend" class="${leftoverClass}">${fmtMoney(u.leftover_spending_money)}</td>
       </tr>
     `;
   }).join('');
 
   wrap.innerHTML = `
-    <table>
+    <table class="responsive-table">
       <thead>
         <tr>
           <th>Member</th>

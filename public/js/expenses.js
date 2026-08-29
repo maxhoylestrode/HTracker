@@ -29,13 +29,13 @@ function renderTable() {
   allExpenses.forEach((e) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${escapeHtml(e.name)}</td>
-      <td><span class="cat-chip"><span class="dot" style="background:${e.color}"></span>${e.category}</span></td>
-      <td><span class="badge">${PAYMENT_TYPE_LABELS[e.payment_type] || e.payment_type}</span></td>
-      <td>${FREQ_LABELS[e.frequency] || e.frequency}</td>
-      <td>${fmtMoney(e.current_cost)}</td>
-      <td>${fmtDate(e.next_due_date)}</td>
-      <td>${e.next_increase ? fmtMoney(e.next_increase.amount) + ' on ' + fmtDate(e.next_increase.effective_date) : '—'}</td>
+      <td class="card-title">${escapeHtml(e.name)}</td>
+      <td data-label="Category"><span class="cat-chip"><span class="dot" style="background:${e.color}"></span>${e.category}</span></td>
+      <td data-label="Payment type"><span class="badge">${PAYMENT_TYPE_LABELS[e.payment_type] || e.payment_type}</span></td>
+      <td data-label="Frequency">${FREQ_LABELS[e.frequency] || e.frequency}</td>
+      <td data-label="Current cost">${fmtMoney(e.current_cost)}</td>
+      <td data-label="Next due">${fmtDate(e.next_due_date)}</td>
+      <td data-label="Next increase">${e.next_increase ? fmtMoney(e.next_increase.amount) + ' on ' + fmtDate(e.next_increase.effective_date) : '—'}</td>
       <td><button class="btn-secondary" data-id="${e.id}" data-action="edit">Edit</button></td>
     `;
     tbody.appendChild(tr);
