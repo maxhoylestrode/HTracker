@@ -106,9 +106,28 @@ router.post('/logout', (req, res) => {
 
 router.get('/session', (req, res) => {
   if (req.session && req.session.userId) {
-    return res.json({ authenticated: true, username: req.session.username });
+    const user = db.prepare('SELECT theme FROM users WHERE id = ?').get(req.session.userId);
+    return res.json({ authenticated: true, username: req.session.username, theme: (user && user.theme) || 'dark' });
   }
   res.json({ authenticated: false });
+});
+
+router.put('/password', loginLimiter, (req, res) => {
+  if (!req.session || !req.session.userId) return res.status(401).json({ error: 'Not authenticated' });
+  const { current_password, new_password } = req.body || {};
+  if (!current_password || !new_password) {
+    return res.status(400).json({ error: 'Current and new password are required' });
+  }
+  if (new_password.length < 8) {
+    return res.status(400).json({ error: 'New password must be at least 8 characters' });
+  }
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.session.userId);
+  if (!user || !bcrypt.compareSync(current_password, user.password_hash)) {
+    return res.status(401).json({ error: 'Current password is incorrect' });
+  }
+  const hash = bcrypt.hashSync(new_password, 12);
+  db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, user.id);
+  res.json({ ok: true });
 });
 
 module.exports = router;

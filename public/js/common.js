@@ -14,6 +14,16 @@ async function api(path, options = {}) {
   return data;
 }
 
+function applyTheme(theme) {
+  if (!theme) return;
+  document.documentElement.setAttribute('data-theme', theme);
+  try {
+    localStorage.setItem('htracker-theme', theme);
+  } catch (e) {
+    // localStorage unavailable — theme still applies for this page load
+  }
+}
+
 async function guardSession() {
   try {
     const data = await api('/api/auth/session');
@@ -23,6 +33,7 @@ async function guardSession() {
     }
     const pill = document.getElementById('userPill');
     if (pill) pill.textContent = data.username;
+    applyTheme(data.theme);
     return data;
   } catch (e) {
     window.location.href = '/login.html';

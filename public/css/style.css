@@ -1,3 +1,4 @@
+/* Dark is the original look and stays the default (no data-theme attribute set). */
 :root {
   --bg: #0f172a;
   --panel: #1e293b;
@@ -10,6 +11,58 @@
   --danger: #ef4444;
   --success: #22c55e;
   --radius: 10px;
+}
+
+:root[data-theme="light"] {
+  --bg: #f1f5f9;
+  --panel: #ffffff;
+  --panel-2: #f1f5f9;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --text-dim: #64748b;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --danger: #dc2626;
+  --success: #16a34a;
+}
+
+:root[data-theme="pink"] {
+  --bg: #241017;
+  --panel: #38182a;
+  --panel-2: #452237;
+  --border: #5c2f47;
+  --text: #fce7f3;
+  --text-dim: #d9a9c4;
+  --accent: #ec4899;
+  --accent-hover: #db2777;
+  --danger: #f87171;
+  --success: #34d399;
+}
+
+:root[data-theme="purple"] {
+  --bg: #1a1729;
+  --panel: #26213e;
+  --panel-2: #322b52;
+  --border: #453a6b;
+  --text: #ede9fe;
+  --text-dim: #b3a6db;
+  --accent: #a855f7;
+  --accent-hover: #9333ea;
+  --danger: #f87171;
+  --success: #34d399;
+}
+
+:root[data-theme="silver"] {
+  --bg: #e2e5ea;
+  --panel: #f8fafc;
+  --panel-2: #edf0f4;
+  --border: #cbd5e1;
+  --text: #1e293b;
+  --text-dim: #5b6678;
+  --accent: #52606d;
+  --accent-hover: #3e4855;
+  --danger: #dc2626;
+  --success: #16a34a;
 }
 
 * { box-sizing: border-box; }
@@ -361,4 +414,46 @@ tr:hover td { background: var(--panel-2); }
 @media (max-width: 400px) {
   .app-nav a { font-size: 0.8rem; }
   .cards { grid-template-columns: 1fr 1fr; }
+}
+
+/* ---- Settings page: theme swatches ---- */
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 0.75rem;
+}
+.theme-swatch {
+  background: var(--panel-2);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.6rem;
+  cursor: pointer;
+  text-align: center;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.theme-swatch:hover { border-color: var(--text-dim); }
+.theme-swatch.selected { border-color: var(--accent); }
+.swatch-preview {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  height: 44px;
+  border-radius: 7px;
+  padding: 6px;
+  margin-bottom: 0.5rem;
+  border: 1px solid rgba(0,0,0,0.15);
+}
+.swatch-panel {
+  flex: 1;
+  align-self: stretch;
+  border-radius: 4px;
+  margin-right: 6px;
+}
+.swatch-accent {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Htracker — Settings</title>
+<script src="/js/theme-boot.js"></script>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="app-header">
+  <div class="brand">🏠 Htracker</div>
+  <nav class="app-nav">
+    <a href="/index.html">Dashboard</a>
+    <a href="/calendar.html">Calendar</a>
+    <a href="/expenses.html">Expenses</a>
+    <a href="/budget.html">Budget</a>
+    <a href="/settings.html">Settings</a>
+    <div class="user-pill">
+      <span id="userPill"></span>
+      <button id="logoutBtn" class="btn-secondary">Log out</button>
+    </div>
+  </nav>
+</header>
+
+<main class="app-main">
+
+  <div class="panel">
+    <h2>Theme</h2>
+    <p class="field-hint" style="margin-top:-0.5rem; margin-bottom:1rem;">Applies instantly and only affects your own account.</p>
+    <div class="theme-grid" id="themeGrid"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Change password</h2>
+    <form id="passwordForm">
+      <div class="field">
+        <label for="currentPassword">Current password</label>
+        <input id="currentPassword" type="password" autocomplete="current-password" required>
+      </div>
+      <div class="field">
+        <label for="newPassword">New password</label>
+        <input id="newPassword" type="password" autocomplete="new-password" minlength="8" required>
+        <p class="field-hint">At least 8 characters.</p>
+      </div>
+      <div class="field">
+        <label for="confirmPassword">Confirm new password</label>
+        <input id="confirmPassword" type="password" autocomplete="new-password" minlength="8" required>
+      </div>
+      <button type="submit" class="btn-primary" style="width:auto">Update password</button>
+      <span class="error-msg" id="passwordMsg" style="display:inline-block; margin-left:0.75rem;"></span>
+    </form>
+  </div>
+
+</main>
+
+<script src="/js/common.js"></script>
+<script src="/js/settings.js"></script>
+</body>
+</html>

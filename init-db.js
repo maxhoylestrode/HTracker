@@ -71,6 +71,7 @@ addColumnIfMissing('users', 'savings_goal', "REAL NOT NULL DEFAULT 0");
 // household via an invite code. Added nullable so existing rows can be backfilled below,
 // then every row is guaranteed non-null by the end of this script.
 addColumnIfMissing('users', 'household_id', 'INTEGER REFERENCES households(id)');
+addColumnIfMissing('users', 'theme', "TEXT NOT NULL DEFAULT 'dark'");
 addColumnIfMissing('expenses', 'household_id', 'INTEGER REFERENCES households(id)');
 
 // --- Backfill: give every user without a household their own, and attach any
