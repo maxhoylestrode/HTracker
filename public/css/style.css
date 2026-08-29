@@ -146,13 +146,20 @@ button {
 .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
 .cal-header h2 { margin: 0; font-size: 1.2rem; }
 .cal-nav { display: flex; gap: 0.5rem; }
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-.cal-dow { text-align: center; font-size: 0.75rem; color: var(--text-dim); padding-bottom: 0.4rem; text-transform: uppercase; }
+/* minmax(0, 1fr) — not just 1fr — is required here: grid tracks default to a
+   minmax(auto, 1fr) sizing, so a cell containing a long nowrap event chip (e.g.
+   a long expense name) would otherwise force its whole column wider than the
+   others, squeezing every other day. min-width: 0 on the cells does the same
+   job for their contents so overflow/ellipsis on .cal-event actually applies. */
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.cal-dow { text-align: center; font-size: 0.75rem; color: var(--text-dim); padding-bottom: 0.4rem; text-transform: uppercase; min-width: 0; }
 .cal-cell {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 8px;
   min-height: 90px;
+  min-width: 0;
+  overflow: hidden;
   padding: 0.4rem;
   font-size: 0.75rem;
 }
@@ -278,11 +285,11 @@ tr:hover td { background: var(--panel-2); }
   .cal-header { flex-direction: column; align-items: stretch; gap: 0.6rem; }
   .cal-nav { justify-content: space-between; }
   .cal-nav button { flex: 1; }
-  .cal-grid { gap: 3px; }
-  .cal-dow { font-size: 0.62rem; padding-bottom: 0.25rem; }
-  .cal-cell { min-height: 58px; padding: 0.2rem; border-radius: 5px; }
-  .cal-cell .day-num { font-size: 0.7rem; margin-bottom: 0.15rem; }
-  .cal-event { font-size: 0.56rem; padding: 1px 3px; margin-bottom: 1px; }
+  .cal-grid { gap: 2px; }
+  .cal-dow { font-size: 0.55rem; padding-bottom: 0.2rem; letter-spacing: 0; }
+  .cal-cell { min-height: 44px; padding: 0.15rem; border-radius: 4px; font-size: 0.6rem; }
+  .cal-cell .day-num { font-size: 0.62rem; margin-bottom: 0.1rem; }
+  .cal-event { font-size: 0.5rem; padding: 1px 2px; margin-bottom: 1px; border-radius: 3px; }
 
   /* ---- Bars / list rows (dashboard) — tighten fixed widths a bit ---- */
   .bar-row .bar-label { width: 92px; font-size: 0.8rem; }
