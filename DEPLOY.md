@@ -1,4 +1,4 @@
-# Deploying Htracker on Ubuntu, behind Nginx Proxy Manager
+# Deploying Budgeteer on Ubuntu, behind Nginx Proxy Manager
 
 This setup assumes Nginx Proxy Manager (NPM) is running in Docker on a **different** server, and this Ubuntu box just runs the Node app and exposes it on the network for NPM to reach. Domain used below: `tracker.apexstudio.dev` — replace it if that changes. Run everything as a user with `sudo` access.
 
@@ -37,7 +37,7 @@ nano .env   # confirm NODE_ENV=production and TRUST_PROXY=true
 ```bash
 sudo tee /etc/systemd/system/htracker.service > /dev/null << 'EOF'
 [Unit]
-Description=Htracker
+Description=Budgeteer
 After=network.target
 
 [Service]
@@ -86,7 +86,7 @@ In the NPM web UI → **Proxy Hosts** → **Add Proxy Host**:
 - **Forward Port**: `3000`
 - **Websockets Support**: off (not needed, doesn't hurt if left on)
 
-On the **SSL** tab: request a new Let's Encrypt certificate, enable **Force SSL** and **HTTP/2 Support**. Make sure the domain's DNS A/AAAA record already points at wherever NPM's server is reachable (its public IP), not at this Htracker box.
+On the **SSL** tab: request a new Let's Encrypt certificate, enable **Force SSL** and **HTTP/2 Support**. Make sure the domain's DNS A/AAAA record already points at wherever NPM's server is reachable (its public IP), not at this Budgeteer box.
 
 Save, then `tracker.apexstudio.dev` should load the app over HTTPS.
 

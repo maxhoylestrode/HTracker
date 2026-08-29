@@ -1,7 +1,7 @@
 {
   "id": "/index.html",
-  "name": "Htracker",
-  "short_name": "Htracker",
+  "name": "Budgeteer",
+  "short_name": "Budgeteer",
   "description": "Household expense tracker — calendar, budget split, and payment tracking.",
   "start_url": "/index.html",
   "scope": "/",

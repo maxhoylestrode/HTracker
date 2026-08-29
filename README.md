@@ -1,4 +1,4 @@
-# Htracker
+# Budgeteer
 
 A simple, self-hosted household expense tracker. Single login, color-coded calendar view, and a dashboard of totals — built to run on a small Ubuntu VPS behind nginx.
 

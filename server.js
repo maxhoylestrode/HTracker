@@ -69,5 +69,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Htracker listening on port ${PORT}`);
+  console.log(`Budgeteer listening on port ${PORT}`);
 });
