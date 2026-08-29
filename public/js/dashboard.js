@@ -1,8 +1,22 @@
 async function loadDashboard() {
-  const summary = await api('/api/summary');
+  const [summary, household] = await Promise.all([
+    api('/api/summary'),
+    api('/api/household').catch(() => null)
+  ]);
 
   document.getElementById('totalMonthly').textContent = fmtMoney(summary.total_monthly);
-  document.getElementById('yourShare').textContent = fmtMoney(summary.total_monthly / 2);
+
+  const you = household ? household.users.find((u) => u.is_you) : null;
+  const shareEl = document.getElementById('yourShare');
+  const shareNote = document.getElementById('yourShareNote');
+  if (you) {
+    shareEl.textContent = fmtMoney(you.share_of_bills);
+    if (shareNote) shareNote.textContent = `${you.normalized_share_percentage}% split of total monthly spend`;
+  } else {
+    shareEl.textContent = fmtMoney(summary.total_monthly / 2);
+    if (shareNote) shareNote.textContent = '50/50 split of total monthly spend';
+  }
+
   document.getElementById('activeCount').textContent = summary.active_expense_count;
   document.getElementById('due30Count').textContent = summary.upcoming_30_days.length;
   document.getElementById('increaseCount').textContent = summary.upcoming_cost_increases.length;

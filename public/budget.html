@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Htracker — Budget</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="app-header">
+  <div class="brand">🏠 Htracker</div>
+  <nav class="app-nav">
+    <a href="/index.html">Dashboard</a>
+    <a href="/calendar.html">Calendar</a>
+    <a href="/expenses.html">Expenses</a>
+    <a href="/budget.html">Budget</a>
+    <div class="user-pill">
+      <span id="userPill"></span>
+      <button id="logoutBtn" class="btn-secondary">Log out</button>
+    </div>
+  </nav>
+</header>
+
+<main class="app-main">
+
+  <div class="panel">
+    <h2>Household breakdown</h2>
+    <div id="breakdownTableWrap"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Your numbers</h2>
+    <p class="field-hint" style="margin-top:-0.5rem; margin-bottom:1rem;">These feed the breakdown above — only you can see or change your own figures.</p>
+    <form id="myBudgetForm">
+      <div class="row-2">
+        <div class="field">
+          <label for="myIncome">Your monthly income (£)</label>
+          <input id="myIncome" type="number" step="0.01" min="0" required>
+        </div>
+        <div class="field">
+          <label for="mySplit">Your split of shared bills (%)</label>
+          <input id="mySplit" type="number" step="0.1" min="0" max="100" required>
+          <p class="field-hint">Doesn't need to add to 100 with the other person's — it's normalized automatically.</p>
+        </div>
+      </div>
+      <div class="field">
+        <label for="mySavings">Monthly savings goal (£)</label>
+        <input id="mySavings" type="number" step="0.01" min="0" required>
+      </div>
+      <button type="submit" class="btn-primary" style="width:auto">Save</button>
+      <span class="error-msg" id="myBudgetMsg" style="display:inline-block; margin-left:0.75rem;"></span>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h2>Household</h2>
+    <p class="field-hint" style="margin-top:-0.5rem;">Your account is private by default. Share your invite code with someone to let them see and add to the same expenses — they'll enter it when they sign up, or use the join box below at any time.</p>
+
+    <div class="field">
+      <label>Your invite code</label>
+      <div style="display:flex; gap:0.5rem; align-items:center;">
+        <input id="inviteCodeDisplay" readonly style="max-width:200px; font-family:monospace; letter-spacing:0.1em;">
+        <button type="button" class="btn-secondary" id="copyInviteBtn" style="width:auto">Copy</button>
+        <button type="button" class="btn-secondary" id="regenerateInviteBtn" style="width:auto">Regenerate</button>
+      </div>
+      <p class="field-hint">Regenerating invalidates the old code — anyone who had it can no longer join with it.</p>
+    </div>
+
+    <div class="field">
+      <label>Members sharing this household</label>
+      <div id="memberList"></div>
+    </div>
+
+    <hr style="border-color:var(--border); margin:1.25rem 0">
+
+    <form id="joinForm">
+      <div class="field">
+        <label for="joinCode">Join a different household</label>
+        <input id="joinCode" placeholder="Enter someone's invite code">
+        <p class="field-hint">This switches which shared expenses your account sees. Anything you've already entered stays behind on your current household and won't follow you.</p>
+      </div>
+      <button type="submit" class="btn-secondary" style="width:auto">Join</button>
+      <span class="error-msg" id="joinMsg" style="display:inline-block; margin-left:0.75rem;"></span>
+    </form>
+  </div>
+
+</main>
+
+<script src="/js/common.js"></script>
+<script src="/js/budget.js"></script>
+</body>
+</html>

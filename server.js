@@ -7,10 +7,11 @@ const session = require('express-session');
 const path = require('path');
 
 const SqliteStore = require('./sqlite-session-store');
-const { requireAuth, checkOrigin } = require('./middleware/auth');
+const { requireAuth, attachHousehold, checkOrigin } = require('./middleware/auth');
 const authRoutes = require('./routes/auth');
 const expenseRoutes = require('./routes/expenses');
 const reportRoutes = require('./routes/reports');
+const userRoutes = require('./routes/users');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -49,8 +50,9 @@ app.use(session({
 app.use(checkOrigin);
 
 app.use('/api/auth', authRoutes);
-app.use('/api/expenses', requireAuth, expenseRoutes);
-app.use('/api', requireAuth, reportRoutes); // /api/summary, /api/calendar
+app.use('/api/expenses', requireAuth, attachHousehold, expenseRoutes);
+app.use('/api/users', requireAuth, userRoutes); // /api/users/me (household routes look up household_id themselves)
+app.use('/api', requireAuth, attachHousehold, reportRoutes); // /api/summary, /api/calendar, /api/household
 
 // Static frontend
 app.use(express.static(path.join(__dirname, 'public')));

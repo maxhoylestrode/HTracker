@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Htracker — Create Account</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+    <h1>Htracker</h1>
+    <p class="sub">Create your account</p>
+    <form id="signupForm" method="POST" action="/api/auth/register">
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" name="username" autocomplete="username" required autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+        <p class="field-hint">At least 8 characters.</p>
+      </div>
+      <div class="field">
+        <label for="invite_code">Household invite code (optional)</label>
+        <input id="invite_code" name="invite_code" autocomplete="off" placeholder="e.g. TGH57WSM">
+        <p class="field-hint">Leave blank to start your own private household. Enter a code someone shared with you to join theirs and share expense data with them.</p>
+      </div>
+      <div class="field hidden" id="signupCodeField">
+        <label for="signup_code">Signup code</label>
+        <input id="signup_code" name="signup_code" autocomplete="off">
+        <p class="field-hint">Required by this server's admin to register at all.</p>
+      </div>
+      <button type="submit" class="btn-primary">Create account</button>
+      <div class="error-msg" id="errorMsg"></div>
+    </form>
+    <p class="auth-switch">Already have an account? <a href="/login.html">Sign in</a></p>
+  </div>
+</div>
+<script src="/js/signup.js"></script>
+</body>
+</html>

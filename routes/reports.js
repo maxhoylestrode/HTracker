@@ -3,22 +3,13 @@ const db = require('../db');
 const { currentCost, nextIncrease } = require('../lib/cost');
 const { occurrencesInRange, nextOccurrence, addMonths, toISO, parseISO } = require('../lib/dates');
 const { colorFor, CATEGORY_COLORS, PAYMENT_TYPE_COLORS } = require('../lib/categories');
+const { monthlyEquivalent, getTotalMonthly } = require('../lib/totals');
 
 const router = express.Router();
 
-// Monthly-equivalent value of an expense, for totalling across differing frequencies.
-function monthlyEquivalent(amount, frequency) {
-  switch (frequency) {
-    case 'weekly': return amount * 52 / 12;
-    case 'yearly': return amount / 12;
-    case 'one_off': return 0; // one-offs are excluded from recurring monthly totals
-    default: return amount; // monthly
-  }
-}
-
 router.get('/summary', (req, res) => {
   const today = new Date().toISOString().slice(0, 10);
-  const rows = db.prepare('SELECT * FROM expenses WHERE active = 1').all();
+  const rows = db.prepare('SELECT * FROM expenses WHERE active = 1 AND household_id = ?').all(req.householdId);
 
   let totalMonthly = 0;
   const byCategory = {};
@@ -80,7 +71,7 @@ router.get('/calendar', (req, res) => {
   const rangeEnd = toISO(addMonths(start, 1)); // exclusive-ish upper bound, occurrencesInRange is inclusive so subtract a day conceptually
   const inclusiveEnd = toISO(new Date(parseISO(rangeEnd).getTime() - 86400000));
 
-  const rows = db.prepare('SELECT * FROM expenses WHERE active = 1').all();
+  const rows = db.prepare('SELECT * FROM expenses WHERE active = 1 AND household_id = ?').all(req.householdId);
   const events = [];
   for (const e of rows) {
     const occ = occurrencesInRange(e, rangeStart, inclusiveEnd);
@@ -98,6 +89,40 @@ router.get('/calendar', (req, res) => {
   }
   events.sort((a, b) => a.date.localeCompare(b.date));
   res.json({ month, events });
+});
+
+// GET /api/household — per-user income/split/savings breakdown against the household's
+// shared monthly total. Only includes members of the requester's own household.
+// Split percentages are normalized against their sum, so it self-corrects even if they don't add to exactly 100.
+router.get('/household', (req, res) => {
+  const totalMonthly = getTotalMonthly(req.householdId);
+  const users = db.prepare(
+    'SELECT id, username, monthly_income, split_percentage, savings_goal FROM users WHERE household_id = ? ORDER BY id ASC'
+  ).all(req.householdId);
+
+  const sumPercentage = users.reduce((sum, u) => sum + (u.split_percentage || 0), 0) || 1; // avoid div-by-zero
+
+  const breakdown = users.map((u) => {
+    const normalizedShare = (u.split_percentage || 0) / sumPercentage;
+    const shareAmount = Math.round(totalMonthly * normalizedShare * 100) / 100;
+    const leftover = Math.round((u.monthly_income - shareAmount - u.savings_goal) * 100) / 100;
+    return {
+      id: u.id,
+      username: u.username,
+      monthly_income: u.monthly_income,
+      split_percentage: u.split_percentage,
+      normalized_share_percentage: Math.round(normalizedShare * 1000) / 10, // one decimal place
+      savings_goal: u.savings_goal,
+      share_of_bills: shareAmount,
+      leftover_spending_money: leftover,
+      is_you: u.id === req.session.userId
+    };
+  });
+
+  res.json({
+    total_monthly: totalMonthly,
+    users: breakdown
+  });
 });
 
 module.exports = router;

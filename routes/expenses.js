@@ -48,10 +48,10 @@ function validatePayload(body, { partial = false } = {}) {
 
 // GET /api/expenses?active=1
 router.get('/', (req, res) => {
-  let sql = 'SELECT * FROM expenses';
-  const params = [];
+  let sql = 'SELECT * FROM expenses WHERE household_id = ?';
+  const params = [req.householdId];
   if (req.query.active !== undefined) {
-    sql += ' WHERE active = ?';
+    sql += ' AND active = ?';
     params.push(req.query.active === '1' ? 1 : 0);
   }
   sql += ' ORDER BY name COLLATE NOCASE ASC';
@@ -60,7 +60,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/:id', (req, res) => {
-  const row = db.prepare('SELECT * FROM expenses WHERE id = ?').get(req.params.id);
+  const row = db.prepare('SELECT * FROM expenses WHERE id = ? AND household_id = ?').get(req.params.id, req.householdId);
   if (!row) return res.status(404).json({ error: 'Not found' });
   res.json({ ...serialize(row), history: fullHistory(row.id) });
 });
@@ -72,8 +72,8 @@ router.post('/', (req, res) => {
 
   const id = db.withTransaction(() => {
     const info = db.prepare(
-      `INSERT INTO expenses (name, category, payment_type, frequency, start_date, end_date, color, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO expenses (name, category, payment_type, frequency, start_date, end_date, color, notes, household_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(
       body.name.trim(),
       body.category || 'Other',
@@ -82,7 +82,8 @@ router.post('/', (req, res) => {
       body.start_date,
       body.end_date || null,
       body.color || null,
-      body.notes || null
+      body.notes || null,
+      req.householdId
     );
     db.prepare(
       `INSERT INTO expense_cost_history (expense_id, amount, effective_date, note) VALUES (?, ?, ?, ?)`
@@ -94,7 +95,7 @@ router.post('/', (req, res) => {
 });
 
 router.put('/:id', (req, res) => {
-  const existing = db.prepare('SELECT * FROM expenses WHERE id = ?').get(req.params.id);
+  const existing = db.prepare('SELECT * FROM expenses WHERE id = ? AND household_id = ?').get(req.params.id, req.householdId);
   if (!existing) return res.status(404).json({ error: 'Not found' });
 
   const body = req.body || {};
@@ -114,15 +115,15 @@ router.put('/:id', (req, res) => {
   };
 
   db.prepare(
-    `UPDATE expenses SET name=?, category=?, payment_type=?, frequency=?, start_date=?, end_date=?, color=?, notes=?, active=?, updated_at=datetime('now') WHERE id=?`
-  ).run(merged.name, merged.category, merged.payment_type, merged.frequency, merged.start_date, merged.end_date, merged.color, merged.notes, merged.active, req.params.id);
+    `UPDATE expenses SET name=?, category=?, payment_type=?, frequency=?, start_date=?, end_date=?, color=?, notes=?, active=?, updated_at=datetime('now') WHERE id=? AND household_id=?`
+  ).run(merged.name, merged.category, merged.payment_type, merged.frequency, merged.start_date, merged.end_date, merged.color, merged.notes, merged.active, req.params.id, req.householdId);
 
   const row = db.prepare('SELECT * FROM expenses WHERE id = ?').get(req.params.id);
   res.json(serialize(row));
 });
 
 router.delete('/:id', (req, res) => {
-  const existing = db.prepare('SELECT * FROM expenses WHERE id = ?').get(req.params.id);
+  const existing = db.prepare('SELECT * FROM expenses WHERE id = ? AND household_id = ?').get(req.params.id, req.householdId);
   if (!existing) return res.status(404).json({ error: 'Not found' });
   db.prepare('DELETE FROM expenses WHERE id = ?').run(req.params.id);
   res.json({ ok: true });
@@ -130,7 +131,7 @@ router.delete('/:id', (req, res) => {
 
 // POST /api/expenses/:id/cost-change  { amount, effective_date, note }
 router.post('/:id/cost-change', (req, res) => {
-  const existing = db.prepare('SELECT * FROM expenses WHERE id = ?').get(req.params.id);
+  const existing = db.prepare('SELECT * FROM expenses WHERE id = ? AND household_id = ?').get(req.params.id, req.householdId);
   if (!existing) return res.status(404).json({ error: 'Not found' });
   const { amount, effective_date, note } = req.body || {};
   if (amount === undefined || isNaN(Number(amount))) return res.status(400).json({ error: 'amount is required' });
@@ -144,7 +145,7 @@ router.post('/:id/cost-change', (req, res) => {
 });
 
 router.delete('/:id/cost-change/:historyId', (req, res) => {
-  const existing = db.prepare('SELECT * FROM expenses WHERE id = ?').get(req.params.id);
+  const existing = db.prepare('SELECT * FROM expenses WHERE id = ? AND household_id = ?').get(req.params.id, req.householdId);
   if (!existing) return res.status(404).json({ error: 'Not found' });
   db.prepare('DELETE FROM expense_cost_history WHERE id = ? AND expense_id = ?').run(req.params.historyId, req.params.id);
   res.json({ history: fullHistory(req.params.id) });
