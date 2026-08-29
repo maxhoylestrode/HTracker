@@ -27,7 +27,9 @@ app.use(helmet({
       scriptSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", 'data:'],
-      connectSrc: ["'self'"]
+      connectSrc: ["'self'"],
+      manifestSrc: ["'self'"], // manifest.json, for "Add to Home Screen" / install
+      workerSrc: ["'self'"]    // sw.js, required to register the service worker
     }
   }
 }));
