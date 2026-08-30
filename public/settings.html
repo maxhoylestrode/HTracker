@@ -41,6 +41,29 @@
   </div>
 
   <div class="panel">
+    <h2>Bank connection</h2>
+    <p class="field-hint" style="margin-top:-0.5rem; margin-bottom:1rem;">Connects your own Monzo account only — private to you, nobody else on Budgeteer (including anyone sharing your household) can see it unless you show them.</p>
+    <div id="monzoStatusMsg"></div>
+    <div id="monzoDisconnected" class="hidden">
+      <a href="/api/monzo/connect" class="btn-primary" style="width:auto; display:inline-block; padding:0.6rem 1rem; text-decoration:none;">Connect Monzo</a>
+    </div>
+    <div id="monzoConnected" class="hidden">
+      <div class="cards" style="margin-bottom:1rem;">
+        <div class="card">
+          <div class="label">Balance</div>
+          <div class="value" id="monzoBalance">—</div>
+        </div>
+        <div class="card">
+          <div class="label">Spent Today</div>
+          <div class="value" id="monzoSpendToday">—</div>
+        </div>
+      </div>
+      <p class="field-hint" id="monzoSyncedNote"></p>
+      <button type="button" class="btn-secondary" id="monzoDisconnectBtn">Disconnect Monzo</button>
+    </div>
+  </div>
+
+  <div class="panel">
     <h2>Change password</h2>
     <form id="passwordForm">
       <div class="field">

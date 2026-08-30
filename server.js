@@ -12,6 +12,7 @@ const authRoutes = require('./routes/auth');
 const expenseRoutes = require('./routes/expenses');
 const reportRoutes = require('./routes/reports');
 const userRoutes = require('./routes/users');
+const monzoRoutes = require('./routes/monzo');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -54,6 +55,11 @@ app.use(checkOrigin);
 app.use('/api/auth', authRoutes);
 app.use('/api/expenses', requireAuth, attachHousehold, expenseRoutes);
 app.use('/api/users', requireAuth, userRoutes); // /api/users/me (household routes look up household_id themselves)
+// Mounted before the broad '/api' catch-all below, and deliberately NOT wrapped in
+// requireAuth here — /api/monzo/webhook/:secret has to be reachable by Monzo's own
+// servers, which have no session cookie. Every other route in routes/monzo.js applies
+// requireAuth itself. See docs/ADR-001-monzo-integration.md.
+app.use('/api/monzo', monzoRoutes);
 app.use('/api', requireAuth, attachHousehold, reportRoutes); // /api/summary, /api/calendar, /api/household
 
 // Static frontend

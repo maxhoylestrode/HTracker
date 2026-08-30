@@ -89,7 +89,22 @@ function escapeHtml(str) {
   return d.innerHTML;
 }
 
+async function loadMonzoBalanceCard() {
+  try {
+    const data = await api('/api/monzo/status');
+    if (data.connected && data.balance !== null && data.balance !== undefined) {
+      document.getElementById('monzoBalanceValue').textContent = fmtMoney(data.balance);
+      document.getElementById('monzoBalanceCardWrap').style.display = '';
+    }
+  } catch (err) {
+    // Not connected, or Monzo unreachable — just leave the card hidden, nothing to show.
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const session = await guardSession();
-  if (session) loadDashboard().catch(console.error);
+  if (session) {
+    loadDashboard().catch(console.error);
+    loadMonzoBalanceCard().catch(console.error);
+  }
 });

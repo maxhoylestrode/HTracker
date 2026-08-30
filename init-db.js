@@ -47,6 +47,46 @@ CREATE TABLE IF NOT EXISTS sessions (
   sess TEXT NOT NULL,
   expires INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS app_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
+-- Bank connections are per-USER, deliberately not tied to household_id — a Monzo
+-- connection is only ever consented to by the one person who approved it in their
+-- own Monzo app, and must never be visible to anyone else in their household.
+CREATE TABLE IF NOT EXISTS bank_connections (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  provider TEXT NOT NULL DEFAULT 'monzo',
+  monzo_account_id TEXT NOT NULL,
+  access_token_enc TEXT NOT NULL,
+  refresh_token_enc TEXT,
+  token_expires_at TEXT NOT NULL,
+  webhook_id TEXT,
+  webhook_secret TEXT NOT NULL UNIQUE,
+  status TEXT NOT NULL DEFAULT 'active',
+  last_synced_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(user_id, provider)
+);
+
+CREATE TABLE IF NOT EXISTS bank_transactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  connection_id INTEGER NOT NULL REFERENCES bank_connections(id) ON DELETE CASCADE,
+  monzo_transaction_id TEXT NOT NULL UNIQUE,
+  amount REAL NOT NULL,
+  currency TEXT NOT NULL,
+  description TEXT,
+  merchant_name TEXT,
+  category TEXT,
+  monzo_created_at TEXT NOT NULL,
+  linked_expense_id INTEGER REFERENCES expenses(id),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_bank_transactions_connection ON bank_transactions(connection_id, monzo_created_at);
 `);
 
 // --- Idempotent migrations for columns added after the initial release ---
@@ -103,6 +143,20 @@ if (orphanExpenseCount > 0) {
   if (firstUser) {
     db.prepare('UPDATE expenses SET household_id = ? WHERE household_id IS NULL').run(firstUser.household_id);
     console.log(`Migration: attached ${orphanExpenseCount} existing expense(s) to household ${firstUser.household_id}`);
+  }
+}
+
+// --- Token encryption key bootstrap ---
+// Auto-generates a key on first boot if TOKEN_ENCRYPTION_KEY isn't set as an env var,
+// so encrypting Monzo tokens at rest doesn't require a manual step. Settable via env
+// var too, for anyone who'd rather pin/back up the key themselves.
+if (!process.env.TOKEN_ENCRYPTION_KEY) {
+  const existingKey = db.prepare("SELECT value FROM app_settings WHERE key = 'token_encryption_key'").get();
+  if (!existingKey) {
+    const crypto = require('crypto');
+    const key = crypto.randomBytes(32).toString('base64');
+    db.prepare("INSERT INTO app_settings (key, value) VALUES ('token_encryption_key', ?)").run(key);
+    console.log('Migration: generated a token encryption key (stored in app_settings)');
   }
 }
 
